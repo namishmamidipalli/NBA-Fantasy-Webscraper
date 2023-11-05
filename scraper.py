@@ -55,14 +55,6 @@ for player, info in my_players.items():
     if req == player:
         print(player, info)
 
-# prompt = input("Enter what stat you want to find, and we will find the current leader of the leaugue in that stat: ")
-
-# for l in current_stat_leaders:
-#     if req in l.text:
-#         print(req + " is the leader of " + l.text)
-
-
-
 teampage = requests.get(f"https://www.basketball-reference.com/teams/{my_players[req]['Abbreviation']}/2024.html")
 teamsoup = BeautifulSoup(teampage.text, "html.parser")
 # player_link = teamsoup.findAll("td", attrs={"class": "left"})
@@ -77,10 +69,11 @@ for player in player_info:
     if name == req:
         playerlink += reference
         break
+
 stop_point = playerlink.find(".html")
 newlink = ''
 for i in range(len(playerlink)):
-    if i == 20:
+    if i == stop_point:
         break
     newlink += playerlink[i]
 
@@ -94,14 +87,16 @@ fga_element = psoup.findAll('td', {'class': 'right', 'data-stat': 'fga'})
 most_recent_fga = fga_element[-1]
 opposition = psoup.findAll('td', {'class': 'left', 'data-stat': 'opp_id'})
 most_recent_opposition = opposition[-1]
+rebounds = psoup.findAll('td', {'class': 'right', 'data-stat': 'trb'})
+most_recent_rebounds = rebounds[-1]
+assists = psoup.findAll('td', {'class': 'right', 'data-stat': 'ast'})
+most_recent_assists = assists[-1]
+points = psoup.findAll('td', {'class': 'right', 'data-stat': 'pts'})
+most_recent_points = points[-1]
+blocks = psoup.findAll('td', {'class': 'right', 'data-stat': 'blk'})
+most_recent_blocks = blocks[-1]
 
-print(f"In his most recent game against the {nba_teams[most_recent_opposition.text]}, {req} went {most_recent_fg.text} for {most_recent_fga.text} from the field.")
-
-
-
-
-
-
+print(f"In his most recent game against the {nba_teams[most_recent_opposition.text]}, {req} went {most_recent_fg.text} for {most_recent_fga.text} from the field. He had {most_recent_points.text} points, {most_recent_assists.text} assists, {most_recent_blocks.text} blocks, and {most_recent_rebounds.text} rebounds.")
 
 
 
