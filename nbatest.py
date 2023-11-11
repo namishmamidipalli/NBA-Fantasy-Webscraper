@@ -42,10 +42,10 @@ username = driver.find_element(by=By.ID, value="InputLoginValue")
 
 
 time.sleep(2)
-username.send_keys('namishkmami@gmail.com')
+username.send_keys('example@gmail.com')
 # password = driver.find_element_by_xpath("//input[@placeholder='Password (case sensitive)']")
 password = driver.find_element(by=By.ID, value="InputPassword")
-password.send_keys('Abhish09')
+password.send_keys('example')
 time.sleep(2)
 # print('Logging In')
 # # ##Submit credentials
