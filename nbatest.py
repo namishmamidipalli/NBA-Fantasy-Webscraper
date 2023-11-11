@@ -15,7 +15,7 @@ driver = webdriver.Safari()  # Use the appropriate WebDriver (e.g., Chrome)
 driver.get('https://www.espn.com/')
 driver.maximize_window()
 driver.set_window_size(1500, 900)
-time.sleep(3)
+time.sleep(8)
 
 ##Open Initial Log In Location
 search_box = driver.find_element(by=By.ID, value='global-user-trigger')
@@ -42,10 +42,10 @@ username = driver.find_element(by=By.ID, value="InputLoginValue")
 
 
 time.sleep(2)
-username.send_keys('example@gmail.com')
+username.send_keys('namishkmami@gmail.com')
 # password = driver.find_element_by_xpath("//input[@placeholder='Password (case sensitive)']")
 password = driver.find_element(by=By.ID, value="InputPassword")
-password.send_keys('example')
+password.send_keys('Abhish09')
 time.sleep(2)
 # print('Logging In')
 # # ##Submit credentials
@@ -75,7 +75,7 @@ driver.switch_to.default_content()
 calendar = driver.find_element(by=By.XPATH, value="//button[@aria-label='Calendar' and @class='DateCarousel__MonthTrigger']")
 calendar.click()
 driver.implicitly_wait(4.0)
-date = driver.find_element(by=By.XPATH, value="//li[@class='MonthContainer__Day MonthContainer__Day--noEvent' and text()='11']")
+date = driver.find_element(by=By.XPATH, value="//li[@class='MonthContainer__Day MonthContainer__Day--noEvent' and text()='12']")
 date.click()
 # calendar.click()
 
@@ -84,15 +84,37 @@ page = driver.page_source
 soup = BeautifulSoup(page, 'html.parser')
 
 
-bench = soup.findAll('div', attrs={"title": "Bench", "class": "jsx-2810852873 table--cell"})
+# bench = soup.findAll('td', {'class': 'Table__TD Table__TD--fixed-width', 'style': 'width: 60px;'})
+pos = soup.findAll('div', attrs={'class': 'jsx-2810852873 table--cell'})
 player_info = soup.findAll('div', attrs={"class": "jsx-1811044066 player-column__bio"})
 matchups = soup.findAll('div', attrs={"class": "jsx-2810852873 table--cell opp ml4"})
-matchups = matchups[:15]
 
-bench_players_with_games = []
-for player, benchspot, opps in zip(reversed(player_info), bench, reversed(matchups)):
-    print(player.text, benchspot.text, opps.text)
-    if opps != "--":
-        bench_players_with_games.append(player)
+# players = soup.findAll('td', {'class': 'Table__TD Table__TD--fixed-width', 'style': 'width: 228px;'})
+# borderplayer = soup.findAll('td', {'class': 'Table__TR Table__TR--lg Table__odd Table__border-row'})
+players = soup.findAll('div', attrs={'class': 'jsx-1811044066 player-column__athlete flex'})
 
+playing_but_bench = []
 
+for p, player, opps in zip(pos, players, matchups):
+    print(player.text, "opponent is", opps.text, "pos is ", p.text)
+    if "Bench" in p.text and opps.text != "--":
+        playing_but_bench.append(player)
+
+for player in playing_but_bench:
+    print(player.text, "is playing but is on your bench!")
+
+for player in playing_but_bench:
+    print(player)
+
+# for player, opps in zip(players, matchups):
+#     print(player.text, "opponent is", opps.text)
+#     if "Bench" in player.text and opps.text != "--":
+#         print(player.text + " has a game but is on the bench.")
+
+# bench_players_with_games = []
+# for player, benchspot, opps in zip(reversed(player_info), bench, reversed(matchups)):
+#     print(player.text, benchspot.text, opps.text)
+#     if opps.text != "--":
+#         bench_players_with_games.append(player.text)
+
+# print(bench_players_with_games)
