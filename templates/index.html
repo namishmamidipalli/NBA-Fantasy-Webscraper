@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scraping with Flask</title>
+</head>
+<body>
+    <h1>Playing but on the Bench:</h1>
+    <ul>
+        {% for player in playing_but_bench %}
+            <li>{{ player }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
