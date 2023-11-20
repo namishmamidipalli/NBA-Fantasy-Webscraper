@@ -3,14 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scraping with Flask</title>
+    <title>Fantasy Bench Players</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .day-container {
+            margin-bottom: 20px;
+        }
+
+        .day-header {
+            background-color: #eee;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .bench-players {
+            margin-top: 10px;
+        }
+
+        .player {
+            margin-bottom: 5px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Playing but on the Bench:</h1>
-    <ul>
-        {% for player in playing_but_bench %}
-            <li>{{ player }}</li>
-        {% endfor %}
-    </ul>
+    <h1>Fantasy Bench Players</h1>
+
+    {% for day_info in all_bench_players %}
+        <div class="day-container">
+            <div class="day-header">
+                <h2>Day {{ day_info['day'] }}</h2>
+            </div>
+            <div class="bench-players">
+                {% if day_info['bench_players'] %}
+                    <h3>Bench Players:</h3>
+                    <ul>
+                        {% for player in day_info['bench_players'] %}
+                            <li class="player">{{ player }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No bench players for this day.</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
 </body>
 </html>
