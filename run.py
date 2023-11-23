@@ -1,11 +1,130 @@
-# from flask import Flask, render_template, jsonify
-# from bs4 import BeautifulSoup
-# from selenium import webdriver
-# from selenium.webdriver.common.by import By
-# from selenium.webdriver.common.keys import Keys
-# import time
 from datetime import date
 import calendar
+from flask import Flask, render_template
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import time
+# from datetime import date, calendar
+
+app = Flask(__name__)
+
+def get_bench_players(soup, driver, day):
+
+    playing_but_bench = []
+    target_elements = soup.find_all('tr', class_=['Table__TR Table__TR--lg Table__odd', 'Table__TR Table__TR--lg Table__odd Table__border-row'])
+    # parent_td = driver.find_element(By.XPATH, "//td[@class='Table__TD Table__TD--fixed-width' and contains(@style, 'width: 98px;')]")
+
+    # # Now, find the 'MOVE' button within the 'td' element
+    # move_button = parent_td.find_element(By.XPATH, ".//button[contains(@class, 'move-action-btn')]")
+    # move_button.click()
+
+
+    for element in target_elements:
+        if "Bench" in element.text and "--" not in element.text:
+            
+            playing_but_bench.append([element, element.text])
+
+
+    return playing_but_bench
+
+@app.route('/')
+def index():
+    today = date.today()
+    year = today.year
+    month = today.month
+    lastday = calendar.monthrange(year, month)[1]
+
+    driver = webdriver.Chrome()  # Use the appropriate WebDriver
+    driver.get('https://www.espn.com/')
+    time.sleep(8)
+
+    search_box = driver.find_element(by=By.ID, value='global-user-trigger')
+    search_box.click()
+    time.sleep(2)
+    print('Open Log In Tab')
+    # Click on the Log In location
+    nextbox = driver.find_element(by=By.XPATH, value="//a[@data-affiliatename='espn']")
+    print(nextbox.text)
+    nextbox.click()
+    print('Click Login')
+    #Switch to iFrame to enter log in credentials
+    driver.implicitly_wait(7.0)
+    time.sleep(3.0)
+
+
+    driver.switch_to.frame("oneid-iframe")
+
+    actual_link = driver.find_element(by=By.LINK_TEXT, value="Looking for username login?")
+    print(actual_link.text)
+    actual_link.click()
+
+    username = driver.find_element(by=By.ID, value="InputLoginValue")
+
+
+    time.sleep(2)
+    username.send_keys('namishkmami@gmail.com')
+    # password = driver.find_element_by_xpath("//input[@placeholder='Password (case sensitive)']")
+    password = driver.find_element(by=By.ID, value="InputPassword")
+    password.send_keys('Abhish09')
+    time.sleep(2)
+    # print('Logging In')
+    # Submit credentials
+    submit_button = driver.find_element(by=By.ID, value="BtnSubmit")
+    submit_button.click()
+    time.sleep(10.0)
+
+    driver.switch_to.default_content()
+
+    search_box = driver.find_element(by=By.ID, value='global-user-trigger')
+    search_box.click()
+    ##Selecting Fantasy League
+    time.sleep(2)
+    leaguego = driver.find_element(by=By.PARTIAL_LINK_TEXT, value='Namish')
+    leaguego.click()
+
+    driver.implicitly_wait(4.0)
+    time.sleep(4.0)
+    print('Going to Fantasy Link')
+
+    time.sleep(4.0)
+    driver.switch_to.default_content()
+    
+    # Navigate to the calendar
+    calendar_button = driver.find_element(by=By.XPATH, value="//button[@aria-label='Calendar' and @class='DateCarousel__MonthTrigger']")
+    calendar_button.click()
+    time.sleep(4.0)
+
+    all_bench_players = []
+
+    # Loop through every day from the current day to the end of the month
+    for day in range(today.day + 1, lastday + 1):
+        # Locate and click on the specific day in the calendar
+        day_element = driver.find_element(by=By.XPATH, value=f"//li[@class='MonthContainer__Day MonthContainer__Day--noEvent' and text()='{day}']")
+        day_element.click()
+
+        time.sleep(4.0)
+        page = driver.page_source
+        soup = BeautifulSoup(page, 'html.parser')
+
+        # Extract bench players for the current day
+        playing_but_bench = get_bench_players(soup, driver, day)
+
+        # Append the results to the list
+        all_bench_players.append({
+            'day': day,
+            'bench_players': playing_but_bench
+        })
+
+    # Close the driver after all iterations
+    driver.quit()
+
+    return render_template('index.html', all_bench_players=all_bench_players)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
 
 # today = date.today()
 # print("Today's date:", today.day)
@@ -116,125 +235,3 @@ import calendar
 
 # if __name__ == '__main__':
 #     app.run(debug=True)
-
-
-from flask import Flask, render_template
-from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-import time
-# from datetime import date, calendar
-
-app = Flask(__name__)
-
-def get_bench_players(soup, driver, day):
-
-    playing_but_bench = []
-    target_elements = soup.find_all('tr', class_=['Table__TR Table__TR--lg Table__odd', 'Table__TR Table__TR--lg Table__odd Table__border-row'])
-    for element in target_elements:
-        if "Bench" in element.text and "--" not in element.text:
-            playing_but_bench.append(element.text)
-
-
-    return playing_but_bench
-
-@app.route('/')
-def index():
-    today = date.today()
-    year = today.year
-    month = today.month
-    lastday = calendar.monthrange(year, month)[1]
-
-    driver = webdriver.Chrome()  # Use the appropriate WebDriver
-    driver.get('https://www.espn.com/')
-    time.sleep(8)
-
-   
-    search_box = driver.find_element(by=By.ID, value='global-user-trigger')
-    search_box.click()
-    time.sleep(2)
-    print('Open Log In Tab')
-    # Click on the Log In location
-    nextbox = driver.find_element(by=By.XPATH, value="//a[@data-affiliatename='espn']")
-    print(nextbox.text)
-    nextbox.click()
-    print('Click Login')
-    #Switch to iFrame to enter log in credentials
-    driver.implicitly_wait(7.0)
-    time.sleep(3.0)
-
-
-    driver.switch_to.frame("oneid-iframe")
-
-    actual_link = driver.find_element(by=By.LINK_TEXT, value="Looking for username login?")
-    print(actual_link.text)
-    actual_link.click()
-
-    username = driver.find_element(by=By.ID, value="InputLoginValue")
-
-
-    time.sleep(2)
-    username.send_keys('namishkmami@gmail.com')
-    # password = driver.find_element_by_xpath("//input[@placeholder='Password (case sensitive)']")
-    password = driver.find_element(by=By.ID, value="InputPassword")
-    password.send_keys('Abhish09')
-    time.sleep(2)
-    # print('Logging In')
-    # # ##Submit credentials
-    submit_button = driver.find_element(by=By.ID, value="BtnSubmit")
-    submit_button.click()
-    time.sleep(10.0)
-
-    driver.switch_to.default_content()
-
-
-    search_box = driver.find_element(by=By.ID, value='global-user-trigger')
-    search_box.click()
-    ##Selecting Fantasy League
-    time.sleep(2)
-    leaguego = driver.find_element(by=By.PARTIAL_LINK_TEXT, value='Namish')
-    leaguego.click()
-
-    driver.implicitly_wait(4.0)
-    time.sleep(4.0)
-    print('Going to Fantasy Link')
-
-
-
-    time.sleep(4.0)
-    driver.switch_to.default_content()
-
-
-    # Navigate to the calendar
-    calendar_button = driver.find_element(by=By.XPATH, value="//button[@aria-label='Calendar' and @class='DateCarousel__MonthTrigger']")
-    calendar_button.click()
-    time.sleep(4.0)
-
-    all_bench_players = []
-
-    # Loop through every day from the current day to the end of the month
-    for day in range(today.day + 1, lastday + 1):
-        # Locate and click on the specific day in the calendar
-        day_element = driver.find_element(by=By.XPATH, value=f"//li[@class='MonthContainer__Day MonthContainer__Day--noEvent' and text()='{day}']")
-        day_element.click()
-
-        time.sleep(4.0)
-        page = driver.page_source
-        soup = BeautifulSoup(page, 'html.parser')
-
-        # Extract bench players for the current day
-        playing_but_bench = get_bench_players(soup, driver, day)
-
-        # Append the results to the list
-        all_bench_players.append({
-            'day': day,
-            'bench_players': playing_but_bench
-        })
-
-    # Close the driver after all iterations
-    driver.quit()
-
-    return render_template('index.html', all_bench_players=all_bench_players)
-
-if __name__ == '__main__':
-    app.run(debug=True)
